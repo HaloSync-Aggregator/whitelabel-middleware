@@ -2,9 +2,65 @@
 
 > [English](README.en.md)
 
-PolarHub NDC API를 위한 NestJS 기반 미들웨어 게이트웨이입니다.
+PolarHub NDC API를 위한 NestJS 기반 미들웨어 게이트웨이입니다. **Claude Code 에이전트/스킬 시스템**으로 전체 소스 코드를 자동 생성합니다.
 
-프론트엔드(camelCase) 요청을 받아 PolarHub(PascalCase) 형식으로 변환하고, HMAC-SHA512 인증을 처리하여 PolarHub API에 전달합니다.
+## 이 레포지토리의 구성
+
+이 레포지토리는 두 가지를 포함합니다:
+
+1. **생성된 샘플 애플리케이션** (`src/`) — 스킬로 생성된 34개 TypeScript 파일, 10개 API 엔드포인트가 포함된 실행 가능한 NestJS 서버
+2. **코드 생성 시스템** (`.claude/`) — Claude Code에서 사용하는 에이전트, 스킬, 레퍼런스 파일
+
+```
+이 레포를 clone하면 바로 실행 가능한 미들웨어 서버를 얻습니다.
+스킬 시스템을 사용하면 처음부터 새로 생성하거나 커스터마이징할 수 있습니다.
+```
+
+## 코드 생성 방식
+
+### `/whitelabel-middleware-init` 스킬
+
+Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 자동 생성합니다:
+
+| Phase | 생성 파일 | 내용 |
+|:-----:|:---------:|:-----|
+| 1 | 4개 | main.ts, app.module.ts, health.controller.ts, polarhub.config.ts |
+| 2 | 4개 | TypeScript 타입, HMAC 인증, 에러 핸들러, 로거 |
+| 3 | 2개 | HTTP 클라이언트, 글로벌 예외 필터 |
+| 4 | 1개 | polarhub.service.ts (~1,800줄, 핵심 변환 로직) |
+| 5 | 12개 | common.dto + 10개 API DTO + barrel export |
+| 6 | 9개 | 8개 API 컨트롤러 + barrel export |
+| 7 | 2개 | polarhub.module.ts, index.ts + 빌드 검증 |
+
+```bash
+# Claude Code에서 실행
+/whitelabel-middleware-init
+```
+
+각 phase의 코드는 `.claude/skills/whitelabel-middleware-init/references/phase-{1~7}-*.md`에 정의되어 있습니다.
+
+### 추가 스킬
+
+| 스킬 | 목적 |
+|:-----|:-----|
+| `whitelabel-middleware-init` | 전체 소스 코드 생성 (34개 파일) |
+| `polarhub-api-routes` | API 라우트 구현 패턴 |
+| `polarhub-hmac-auth` | HMAC-SHA512 인증 구현 |
+| `polarhub-service-patterns` | 서비스 변환 패턴 (camelCase → PascalCase) |
+| `polarhub-dto-templates` | NestJS DTO 템플릿 |
+| `polarhub-controller-templates` | 컨트롤러 템플릿 |
+| `polarhub-types` | TypeScript 타입 정의 |
+| `polarhub-error-handling` | 에러 핸들링 패턴 |
+| `polarhub-testing` | 테스트 전략 |
+
+### 레퍼런스 자료
+
+`.claude/` 하위에 포함된 참조 자료:
+
+- `spec/polarhub.openapi.json` — PolarHub OpenAPI 스펙 스냅샷
+- `docs/api-schemas/*.json` — API별 요청 스키마
+- `asset/carrier_support_matrix.yaml` — 항공사별 지원 매트릭스
+- `.claude/skills/*/references/` — 각 스킬의 상세 구현 가이드
 
 ## 핵심 원칙
 
@@ -15,21 +71,18 @@ PolarHub NDC API를 위한 NestJS 기반 미들웨어 게이트웨이입니다.
 
 ## 사전 요구사항
 
-실제 API 호출을 위해서는 PolarHub 접속 정보가 필요합니다:
-
-- `POLARHUB_API_BASE_URL`
-- `POLARHUB_TENANT_ID`
-- `POLARHUB_API_SECRET`
-- `POLARHUB_AGENCY_CONTACT_ID`
-
-이 정보는 PolarHub 관리자 또는 플랫폼 운영자에게 문의하세요.
+- **Node.js** 20 이상
+- **PolarHub 접속 정보** (API 호출용):
+  - `POLARHUB_API_BASE_URL`, `POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`, `POLARHUB_AGENCY_CONTACT_ID`
+  - PolarHub 관리자 또는 플랫폼 운영자에게 문의
+- **AI 도구** (코드 생성 시): [Claude Code](https://claude.ai/code)
 
 ## 빠른 시작
 
 ### 1. 설치
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/HaloSync-Aggregator/whitelabel-middleware.git
 cd whitelabel-middleware
 npm install
 ```
@@ -86,7 +139,7 @@ docker run -p 3000:3000 --env-file .env whitelabel-middleware
 ## 프로젝트 구조
 
 ```text
-src/
+src/                          # 생성된 NestJS 애플리케이션 (34개 파일)
 ├── main.ts
 ├── app.module.ts
 ├── health.controller.ts
@@ -94,23 +147,26 @@ src/
 │   └── polarhub.config.ts
 └── lib/polarhub/
     ├── polarhub.module.ts
-    ├── polarhub.service.ts
-    ├── client.ts
-    ├── controllers/
-    ├── dto/
-    ├── filters/
-    ├── types/
-    └── utils/
+    ├── polarhub.service.ts   # 핵심 변환 로직 (~1,800줄)
+    ├── client.ts             # PolarHub HTTP 클라이언트
+    ├── controllers/          # 8개 API 컨트롤러
+    ├── dto/                  # 12개 DTO (요청/응답 검증)
+    ├── filters/              # 글로벌 예외 필터
+    ├── types/                # TypeScript 타입 정의
+    └── utils/                # 인증, 로거, 에러 핸들러
 
-spec/
-├── polarhub.openapi.json
-├── schema-llms-index.json
-├── schema-ts-index.json
-└── llms-api-mapping.json
+.claude/                      # Claude Code 에이전트/스킬 시스템
+├── skills/
+│   ├── whitelabel-middleware-init/  # 전체 코드 생성 스킬
+│   │   └── references/             # phase 1~7 레퍼런스
+│   ├── polarhub-api-routes/        # API 라우트 패턴
+│   ├── polarhub-hmac-auth/         # HMAC 인증
+│   └── ...                         # 15+ 스킬
+├── agents/                   # 서브에이전트 정의
+└── CLAUDE.md                 # 프로젝트 컨텍스트
 
-docs/
-├── api-schemas/
-└── architecture/
+spec/                         # OpenAPI 스펙 및 스키마 참조
+docs/                         # API 스키마, 아키텍처 문서
 ```
 
 ## 환경변수
@@ -154,6 +210,15 @@ docs/
 
 모든 PolarHub 비즈니스 API는 `POST` 메서드를 사용합니다.
 
+## 관련 프로젝트
+
+이 미들웨어는 다음 프로젝트와 함께 사용됩니다:
+
+| 프로젝트 | 설명 |
+|:---------|:-----|
+| [whitelabel-client](https://github.com/HaloSync-Aggregator/whitelabel-client) | 멀티테넌트 항공 예약 SPA (이 미들웨어를 백엔드로 사용) |
+| [polarhub-mcp-client](https://github.com/HaloSync-Aggregator/polarhub-mcp-client) | AI 챗봇 MCP 클라이언트 |
+
 ## 로깅 및 개인정보
 
 비프로덕션 환경에서는 요청/응답 페이로드가 `logs/` 디렉토리에 기록됩니다.
@@ -169,3 +234,7 @@ docs/
 ## 라이선스
 
 MIT
+
+---
+
+Built with [Claude Code](https://claude.ai/code)
