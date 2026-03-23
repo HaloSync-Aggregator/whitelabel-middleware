@@ -89,7 +89,7 @@ Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 �
 - **PolarHub 접속 정보** (API 호출용):
   - `POLARHUB_API_BASE_URL`, `POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`, `POLARHUB_AGENCY_CONTACT_ID`
   - PolarHub 관리자 또는 플랫폼 운영자에게 문의
-- **AI 도구** (코드 생성 시): [Claude Code](https://claude.ai/code)
+- **AI 도구** (코드 생성 시): [Claude Code](https://claude.ai/code) Max 플랜 이상
 
 ## 빠른 시작
 
