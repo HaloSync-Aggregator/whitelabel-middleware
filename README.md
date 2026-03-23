@@ -39,19 +39,33 @@ Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 �
 
 각 phase의 코드는 `.claude/skills/whitelabel-middleware-init/references/phase-{1~7}-*.md`에 정의되어 있습니다.
 
-### 추가 스킬
+### `polarhub-backend-developer` 에이전트
+
+코드 생성의 핵심 실행 주체입니다. Claude Code에서 PolarHub API 관련 작업을 요청하면 이 에이전트가 자동으로 활성화되어 아래 스킬들을 참조하며 코드를 구현합니다.
+
+- NestJS 컨트롤러, DTO, 서비스 매핑 구현
+- HMAC-SHA512 인증 처리
+- camelCase(FE) → PascalCase(PolarHub) 변환
+- 에러 핸들링 및 Swagger 문서화
+
+### 스킬 목록
 
 | 스킬 | 목적 |
 |:-----|:-----|
-| `whitelabel-middleware-init` | 전체 소스 코드 생성 (34개 파일) |
-| `polarhub-api-routes` | API 라우트 구현 패턴 |
+| `whitelabel-middleware-init` | 전체 소스 코드 생성 (34개 파일, 7 phase) |
+| `polarhub-api-routes` | 10개 API 라우트 구현 패턴 + 17개 워크플로우 |
 | `polarhub-hmac-auth` | HMAC-SHA512 인증 구현 |
 | `polarhub-service-patterns` | 서비스 변환 패턴 (camelCase → PascalCase) |
-| `polarhub-dto-templates` | NestJS DTO 템플릿 |
-| `polarhub-controller-templates` | 컨트롤러 템플릿 |
-| `polarhub-types` | TypeScript 타입 정의 |
-| `polarhub-error-handling` | 에러 핸들링 패턴 |
-| `polarhub-testing` | 테스트 전략 |
+| `polarhub-dto-templates` | NestJS DTO 템플릿 (class-validator, Swagger) |
+| `polarhub-controller-templates` | 컨트롤러 템플릿 (Swagger, 로깅) |
+| `polarhub-types` | TypeScript 타입 정의 (40+ 인터페이스) |
+| `polarhub-error-handling` | 에러 핸들링 패턴 (BA 50202 특수 케이스 포함) |
+| `polarhub-client` | HTTP 클라이언트 구현 (재시도, 타임아웃) |
+| `polarhub-testing` | 테스트 전략 (HMAC, TransactionID, Zod) |
+| `polarhub-airline-rules` | 항공사별 규칙 (결제, 여권, Trip Type) |
+| `polarhub-transaction-id` | TransactionID 관리 원칙 |
+| `polarhub-zod-schemas` | Zod 런타임 검증 스키마 |
+| `polarhub-best-practices` | 구현 베스트 프랙티스 |
 
 ### 레퍼런스 자료
 
@@ -212,12 +226,9 @@ docs/                         # API 스키마, 아키텍처 문서
 
 ## 관련 프로젝트
 
-이 미들웨어는 다음 프로젝트와 함께 사용됩니다:
-
 | 프로젝트 | 설명 |
 |:---------|:-----|
 | [whitelabel-client](https://github.com/HaloSync-Aggregator/whitelabel-client) | 멀티테넌트 항공 예약 SPA (이 미들웨어를 백엔드로 사용) |
-| [polarhub-mcp-client](https://github.com/HaloSync-Aggregator/polarhub-mcp-client) | AI 챗봇 MCP 클라이언트 |
 
 ## 로깅 및 개인정보
 
