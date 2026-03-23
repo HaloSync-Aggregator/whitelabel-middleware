@@ -2,7 +2,33 @@
 
 > [English](README.en.md)
 
-PolarHub NDC API를 위한 NestJS 기반 미들웨어 게이트웨이입니다. **Claude Code 에이전트/스킬 시스템**으로 전체 소스 코드를 자동 생성합니다.
+PolarHub NDC API 연동을 위한 NestJS 기반 미들웨어 게이트웨이입니다. **Claude Code 에이전트가 전체 소스 코드를 자동 생성**합니다.
+
+## 개요
+
+항공 NDC API 연동은 복잡합니다. 12개 이상 항공사마다 인증 방식, 요청/응답 구조, 워크플로우가 다르고, HMAC-SHA512 서명, 필드 매핑, 에러 처리 등을 직접 구현하려면 수주에서 수개월이 걸립니다.
+
+이 프로젝트는 Claude Code의 에이전트/스킬 시스템으로 **NDC 미들웨어를 몇 분 안에 자동 생성**합니다.
+
+### 왜 미들웨어가 필요한가?
+
+프론트엔드(브라우저)에서 PolarHub API를 직접 호출할 수 없는 이유가 있습니다:
+
+- **인증 정보 보호**: HMAC 시크릿, Tenant ID 등 크리덴셜은 서버에서만 관리해야 합니다
+- **요청 서명**: PolarHub API는 HMAC-SHA512 서명이 필요하며, 이를 브라우저에서 처리하면 시크릿이 노출됩니다
+- **데이터 변환**: 프론트엔드(camelCase)와 PolarHub(PascalCase) 간의 형식 변환을 서버에서 처리합니다
+- **에러 핸들링**: 항공사별 에러 코드를 프론트엔드가 이해할 수 있는 형식으로 통일합니다
+
+### 이 미들웨어의 활용
+
+생성된 미들웨어는 독립적인 NestJS 서버입니다. 다양한 방식으로 활용할 수 있습니다:
+
+| 시나리오 | 설명 |
+|:---------|:-----|
+| **독립 배포** | Docker/PM2 등으로 별도 서버에 배포하여 프론트엔드의 백엔드로 사용 |
+| **기존 서버에 통합** | 자사 OTA 백엔드에 모듈로 흡수 (NestJS Module import) |
+| **커스터마이징** | 생성된 코드에 자사 비즈니스 로직 추가 (마일리지, 할인, 결제 연동 등) |
+| **학습/참고용** | NDC API 연동 패턴을 이해하기 위한 레퍼런스로 활용 |
 
 ## 이 레포지토리의 구성
 
@@ -170,13 +196,14 @@ src/                          # 생성된 NestJS 애플리케이션 (34개 파�
     └── utils/                # 인증, 로거, 에러 핸들러
 
 .claude/                      # Claude Code 에이전트/스킬 시스템
+├── agents/
+│   └── polarhub-backend-developer.md  # 핵심 코드 생성 에이전트
 ├── skills/
-│   ├── whitelabel-middleware-init/  # 전체 코드 생성 스킬
-│   │   └── references/             # phase 1~7 레퍼런스
-│   ├── polarhub-api-routes/        # API 라우트 패턴
-│   ├── polarhub-hmac-auth/         # HMAC 인증
-│   └── ...                         # 15+ 스킬
-├── agents/                   # 서브에이전트 정의
+│   ├── whitelabel-middleware-init/    # 전체 코드 생성 스킬
+│   │   └── references/               # phase 1~7 레퍼런스
+│   ├── polarhub-api-routes/          # API 라우트 패턴
+│   ├── polarhub-hmac-auth/           # HMAC 인증
+│   └── ...                           # 14개 스킬
 └── CLAUDE.md                 # 프로젝트 컨텍스트
 
 spec/                         # OpenAPI 스펙 및 스키마 참조
