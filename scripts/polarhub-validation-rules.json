@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "PolarHub API Implementation Validation Rules",
+
+  "hmacAuth": {
+    "description": "HMAC-SHA512 Authentication Rules",
+    "requiredPatterns": {
+      "digestFormat": "SHA-512=",
+      "authorizationFormat": "hmac username=\"{tenant}\", algorithm=\"hmac-sha512\", headers=\"x-date digest\", signature=\"{signature}\"",
+      "digestTarget": "JSON.stringify({ AgencyID: tenant, Request: bodyRaw })",
+      "signatureString": "x-date: {xDate}\\ndigest: {digest}"
+    },
+    "requiredFunctions": [
+      "sha512Base64",
+      "hmacSha512Base64",
+      "buildHmacHeaders"
+    ],
+    "requiredHeaders": [
+      "Content-Type",
+      "Accept",
+      "x-date",
+      "Digest",
+      "Authorization"
+    ],
+    "clockSkewSeconds": 120
+  },
+
+  "transactionId": {
+    "description": "Transaction ID Management Rules",
+    "maxLength": 32,
+    "preBookingFlow": {
+      "description": "Same Transaction ID must be used",
+      "endpoints": ["airShopping", "offerPrice", "orderCreate"]
+    },
+    "postBookingFlow": {
+      "description": "New Transaction ID generated at OrderRetrieve, then reused",
+      "newIdAt": "orderRetrieve",
+      "reuseFor": ["serviceList", "seatAvailability", "orderChange", "orderReshop", "orderCancel"]
+    }
+  },
+
+  "apiEndpoints": {
+    "airShopping": {
+      "path": "/hub/polarpie/v2/airShopping",
+      "method": "POST",
+      "requiredFields": ["Sender", "PointOfSale", "TransactionID", "Query"],
+      "queryFields": ["OriginDestList", "PaxList"]
+    },
+    "offerPrice": {
+      "path": "/hub/polarpie/v2/offerPrice",
+      "method": "POST",
+      "requiredFields": ["Sender", "PointOfSale", "TransactionID", "Query"]
+    },
+    "orderCreate": {
+      "path": "/hub/polarpie/v2/order",
+      "method": "POST",
+      "requiredFields": ["Sender", "PointOfSale", "TransactionID", "Query"],
+      "queryFields": ["Order", "PaxList", "PaymentList", "ContactInfoList"]
+    },
+    "orderRetrieve": {
+      "path": "/hub/polarpie/v2/orderRetrieve",
+      "method": "POST",
+      "requiredFields": ["Sender", "PointOfSale", "TransactionID", "Query"],
+      "queryFields": ["OrderID"]
+    },
+    "orderCancel": {
+      "path": "/hub/polarpie/v2/orderCancel",
+      "method": "POST"
+    },
+    "orderChange": {
+      "path": "/hub/polarpie/v2/orderChange",
+      "method": "POST"
+    },
+    "orderReshop": {
+      "path": "/hub/polarpie/v2/orderReshop",
+      "method": "POST"
+    },
+    "orderQuote": {
+      "path": "/hub/polarpie/v2/orderQuote",
+      "method": "POST"
+    },
+    "serviceList": {
+      "path": "/hub/polarpie/v2/serviceList",
+      "method": "POST"
+    },
+    "seatAvailability": {
+      "path": "/hub/polarpie/v2/seatAvailability",
+      "method": "POST"
+    }
+  },
+
+  "airlineRules": {
+    "formOfPayment": {
+      "cashOnly": ["AA", "AF", "AY", "BA", "EK", "KL", "LH", "QR", "SQ"],
+      "cashAndCard": ["HA", "KE"],
+      "agentDepositOnly": ["TR"]
+    },
+    "agencyContact": {
+      "BA": {
+        "required": ["EmailAddress", "PostalAddress"],
+        "description": "BA requires Email and Postal Address for agency contact"
+      },
+      "AF": {
+        "required": ["EmailAddress", "Phone"],
+        "description": "AF requires Email and Phone for agency contact"
+      },
+      "KL": {
+        "required": ["EmailAddress", "Phone"],
+        "description": "KL requires Email and Phone for agency contact"
+      }
+    },
+    "passportRequired": {
+      "HA": {
+        "fields": ["IssuingCountryCode", "CitizenshipCountryCode"],
+        "description": "HA requires issuing and citizenship country"
+      },
+      "KE": {
+        "fields": ["IssuingCountryCode", "CitizenshipCountryCode"],
+        "description": "KE requires issuing and citizenship country"
+      },
+      "BA_US": {
+        "condition": "US routes",
+        "fields": ["IdentityDocumentNumber", "IssuingCountryCode", "CitizenshipCountryCode", "ExpiryDate"],
+        "description": "BA requires full passport for US routes"
+      }
+    },
+    "loyaltyProgram": {
+      "supported": ["AF", "KL"],
+      "notSupported": ["AA", "AY", "BA", "EK", "HA", "KE", "LH", "QR", "SQ", "TR"]
+    },
+    "directFlightSearch": {
+      "supported": ["AA", "AF", "BA", "EK", "HA", "KE", "KL", "LH"],
+      "notSupported": ["AY", "QR", "SQ", "TR"]
+    },
+    "tripType": {
+      "KE": {
+        "supported": ["oneWay", "roundTrip"],
+        "notSupported": ["multiCity", "openJaw"]
+      },
+      "default": {
+        "supported": ["oneWay", "roundTrip", "multiCity", "openJaw"]
+      }
+    }
+  },
+
+  "passengerTypes": {
+    "ADT": { "description": "Adult", "minAge": 12 },
+    "CHD": { "description": "Child", "minAge": 2, "maxAge": 11 },
+    "INF": { "description": "Infant", "maxAge": 1, "rule": "count <= ADT count" }
+  },
+
+  "cabinClasses": {
+    "Y": "Economy",
+    "W": "Premium Economy",
+    "C": "Business",
+    "F": "First"
+  },
+
+  "paymentTypes": {
+    "CA": "BSP Cash",
+    "CC": "Credit Card",
+    "EP": "EasyPay",
+    "AG": "Agent Deposit"
+  },
+
+  "errorCodes": {
+    "0": { "status": 200, "meaning": "Success" },
+    "50101": { "status": 400, "meaning": "Invalid request" },
+    "50102": { "status": 401, "meaning": "Authentication failed" },
+    "50103": { "status": 403, "meaning": "Forbidden" },
+    "50201": { "status": 404, "meaning": "Not found" },
+    "50202": { "status": 200, "meaning": "BA booking created (special case)", "isSuccess": true },
+    "50301": { "status": 409, "meaning": "Conflict" },
+    "50401": { "status": 408, "meaning": "Timeout" },
+    "50501": { "status": 500, "meaning": "Internal server error" }
+  }
+}

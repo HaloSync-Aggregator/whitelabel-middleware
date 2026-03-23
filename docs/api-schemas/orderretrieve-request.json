@@ -1,0 +1,82 @@
+{
+  "api": "OrderRetrieve",
+  "root_schema": "OrderRetrieveRQ23",
+  "total_schemas": 2,
+  "schemas": {
+    "OrderRetrieveRQ23": {
+      "type": "object",
+      "required": [
+        "Sender",
+        "PointOfSale",
+        "TransactionID",
+        "Query"
+      ],
+      "properties": {
+        "Sender": {
+          "type": "object",
+          "required": [
+            "TravelAgency"
+          ],
+          "properties": {
+            "TravelAgency": {
+              "$ref": "#/components/schemas/TravelAgencyType1",
+              "description": "Travel agency information"
+            }
+          }
+        },
+        "PointOfSale": {
+          "type": "string",
+          "description": "Point of sale"
+        },
+        "TransactionID": {
+          "type": "string",
+          "description": "Unique identifier key UUID \nTransaction ID \ne.g., 4ba5a0b50d2c45b3b5eb343b57ba8897\n\n32-digit random number required.\n\nKey value for internal log tracking"
+        },
+        "Query": {
+          "type": "object",
+          "required": [
+            "OrderID"
+          ],
+          "properties": {
+            "OrderID": {
+              "type": "string",
+              "description": "Unique order identifier"
+            }
+          }
+        }
+      }
+    },
+    "TravelAgencyType1": {
+      "type": "object",
+      "properties": {
+        "AgencyID": {
+          "type": "string",
+          "description": "Unique identifier for the travel agency (e.g., YOUR_TENANT_ID)"
+        },
+        "SiteCode": {
+          "type": "string",
+          "description": "Site code (e.g., 01, 51 ...)"
+        },
+        "AgencyName": {
+          "type": "string",
+          "description": "Name of the travel agency"
+        },
+        "ContactInfoRefID": {
+          "type": "array",
+          "description": "Reference ID for travel agency contact information. For certain airlines (e.g., BA, AF, KL), providing specific contact details is mandatory for OrderCreateRQ and OrderChangeRQ messages. Failure to provide this information will result in an error. \n• OrderCreateRQ Requirements:\n  - British Airways (BA): Agency email, postal address\n  - Air France (AF), KLM (KL): Agency email, phone number\n• OrderChangeRQ Requirements:\n  - British Airways (BA): Agency email, postal address",
+          "items": {
+            "type": "string",
+            "description": "An individual reference ID for contact information. This ID links to detailed contact information that may be mandatory for specific airline NDC requests. For example, when creating or changing an order: \n\n•   OrderCreateRQ:\n    -   British Airways (BA): Requires agency email and postal address.\n    -   Air France (AF), KLM (KL): Requires agency email and phone number.\n•   OrderChangeRQ:\n    -   British Airways (BA): Requires agency email and postal address.\n\nFailure to provide required contact details for these airlines will result in a processing error."
+          },
+          "minItems": 0
+        }
+      },
+      "title": "TravelAgencyType",
+      "description": "Information pertaining to the Travel Agency in the context of NDC transactions.",
+      "$id": "https://example.com/schemas/TravelAgencyType",
+      "required": [
+        "AgencyID"
+      ]
+    }
+  }
+}

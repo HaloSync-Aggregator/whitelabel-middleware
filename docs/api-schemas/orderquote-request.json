@@ -1,0 +1,493 @@
+{
+  "api": "OrderQuote",
+  "root_schema": "OrderQuoteRQ25",
+  "total_schemas": 5,
+  "schemas": {
+    "OrderQuoteRQ25": {
+      "properties": {
+        "Sender": {
+          "properties": {
+            "TravelAgency": {
+              "description": "Travel agency information",
+              "$ref": "#/components/schemas/TravelAgencyType1"
+            }
+          },
+          "required": [
+            "TravelAgency"
+          ],
+          "type": "object"
+        },
+        "PointOfSale": {
+          "type": "string",
+          "description": "Point of sale"
+        },
+        "TransactionID": {
+          "type": "string",
+          "description": "Unique transaction ID (UUID)\nExample: 4ba5a0b50d2c45b3b5eb343b57ba8897\n\nMust be a 32-character random string.\n\nUsed for internal log tracing."
+        },
+        "Query": {
+          "properties": {
+            "OrderID": {
+              "type": "string",
+              "description": "Unique order identifier"
+            },
+            "SelectedOffer": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/OrderOfferType9"
+              },
+              "minItems": 0
+            },
+            "RepricedOrderID": {
+              "properties": {
+                "OrderID": {
+                  "type": "string",
+                  "description": "Unique order identifier"
+                },
+                "OrderItemRefID": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 0,
+                  "description": "OrderItemID(s) to be repriced"
+                }
+              },
+              "required": [
+                "OrderID"
+              ],
+              "type": "object"
+            },
+            "Criteria": {
+              "$ref": "#/components/schemas/CriteriaType4"
+            },
+            "ResponseParameter": {
+              "$ref": "#/components/schemas/ResponseParameterType5"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "Sender",
+        "PointOfSale",
+        "TransactionID",
+        "Query"
+      ],
+      "type": "object",
+      "title": "OrderQuoteRQ"
+    },
+    "TravelAgencyType1": {
+      "type": "object",
+      "properties": {
+        "AgencyID": {
+          "type": "string",
+          "description": "Unique identifier for the travel agency (e.g., YOUR_TENANT_ID)"
+        },
+        "SiteCode": {
+          "type": "string",
+          "description": "Site code (e.g., 01, 51 ...)"
+        },
+        "AgencyName": {
+          "type": "string",
+          "description": "Name of the travel agency"
+        },
+        "ContactInfoRefID": {
+          "type": "array",
+          "description": "Reference ID for travel agency contact information. For certain airlines (e.g., BA, AF, KL), providing specific contact details is mandatory for OrderCreateRQ and OrderChangeRQ messages. Failure to provide this information will result in an error. \n• OrderCreateRQ Requirements:\n  - British Airways (BA): Agency email, postal address\n  - Air France (AF), KLM (KL): Agency email, phone number\n• OrderChangeRQ Requirements:\n  - British Airways (BA): Agency email, postal address",
+          "items": {
+            "type": "string",
+            "description": "An individual reference ID for contact information. This ID links to detailed contact information that may be mandatory for specific airline NDC requests. For example, when creating or changing an order: \n\n•   OrderCreateRQ:\n    -   British Airways (BA): Requires agency email and postal address.\n    -   Air France (AF), KLM (KL): Requires agency email and phone number.\n•   OrderChangeRQ:\n    -   British Airways (BA): Requires agency email and postal address.\n\nFailure to provide required contact details for these airlines will result in a processing error."
+          },
+          "minItems": 0
+        }
+      },
+      "title": "TravelAgencyType",
+      "description": "Information pertaining to the Travel Agency in the context of NDC transactions.",
+      "$id": "https://example.com/schemas/TravelAgencyType",
+      "required": [
+        "AgencyID"
+      ]
+    },
+    "OrderOfferType9": {
+      "$id": "https://example.com/schemas/OrderOfferType.schema.json",
+      "title": "OrderOfferType",
+      "type": "object",
+      "required": [
+        "OfferID",
+        "Owner",
+        "ResponseID"
+      ],
+      "properties": {
+        "OfferID": {
+          "type": "string",
+          "description": "Unique offer identifier"
+        },
+        "Owner": {
+          "type": "string",
+          "description": "Offer owner (airline or system)"
+        },
+        "ResponseID": {
+          "type": "string",
+          "description": "Response transaction identifier"
+        },
+        "OfferItems": {
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "title": "OfferItemType",
+            "type": "object",
+            "required": [
+              "OfferItemID",
+              "PaxRefID"
+            ],
+            "properties": {
+              "OfferItemID": {
+                "type": "string",
+                "description": "Offer item identifier"
+              },
+              "PaxRefID": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "description": "List of passenger reference IDs associated with this item"
+              },
+              "SeatSelection": {
+                "title": "OfferItemType.SeatSelection",
+                "type": "object",
+                "required": [
+                  "Column",
+                  "Row"
+                ],
+                "properties": {
+                  "Column": {
+                    "type": "string",
+                    "description": "Seat column"
+                  },
+                  "Row": {
+                    "type": "string",
+                    "description": "Seat row"
+                  }
+                }
+              },
+              "BookingInstructions": {
+                "title": "BookingInstructionType",
+                "type": "object",
+                "properties": {
+                  "SsrCode": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 0,
+                    "description": "SSR codes of additional purchased services (e.g., FBAG, ABAG, XBAG, SEAT)"
+                  },
+                  "OsiText": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 0,
+                    "description": "Other Service Information (OSI) text. Example: PAX VIP MEMBER OF PARLIAMENT"
+                  },
+                  "Text": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 0,
+                    "description": "Instructional text for booking"
+                  },
+                  "UpgradeMethod": {
+                    "type": "string",
+                    "description": "Information on upgrade methods and procedures"
+                  },
+                  "Method": {
+                    "type": "string",
+                    "description": "Specific action or process within optional service booking instructions"
+                  },
+                  "Equipment": {
+                    "type": "string",
+                    "description": "Specific equipment or device referenced in booking instructions"
+                  }
+                },
+                "description": "Optional booking instructions including SSR, OSI, and upgrade method."
+              },
+              "Qty": {
+                "type": "number",
+                "description": "Quantity of this item"
+              },
+              "OfferFlightAssociations": {
+                "title": "OfferItemType.OfferFlightAssociations",
+                "type": "object",
+                "required": [
+                  "DatedOperatingLegRefID",
+                  "PaxJourneyRefID",
+                  "PaxSegmentRefID"
+                ],
+                "properties": {
+                  "DatedOperatingLegRefID": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "List of associated Dated Operating Leg reference IDs"
+                  },
+                  "PaxJourneyRefID": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "List of associated PaxJourney reference IDs"
+                  },
+                  "PaxSegmentRefID": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "description": "List of associated PaxSegment reference IDs"
+                  }
+                }
+              }
+            }
+          },
+          "description": "List of OfferItems"
+        },
+        "FopPromotion": {
+          "title": "FopPromotionType",
+          "type": "object",
+          "required": [
+            "PromotionCode"
+          ],
+          "properties": {
+            "PromotionCode": {
+              "type": "string",
+              "description": "Promotion code"
+            },
+            "PaymentType": {
+              "type": "string",
+              "description": "Payment type. Example: A = Card, C = Cash, K = KakaoPay, S = Samsung Pay"
+            },
+            "TotalPromotionAmount": {
+              "title": "SimpleAmountType",
+              "type": "object",
+              "required": [
+                "Amount",
+                "CurCode"
+              ],
+              "properties": {
+                "Amount": {
+                  "type": "number",
+                  "description": "Amount"
+                },
+                "CurCode": {
+                  "type": "string",
+                  "description": "Currency code (ISO 4217, 3 letters)"
+                }
+              },
+              "description": "Total promotion amount"
+            },
+            "PtcPromotionAmount": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "title": "FopPromotionType.PtcPromotionAmount",
+                "type": "object",
+                "required": [
+                  "Ptc",
+                  "Amount"
+                ],
+                "properties": {
+                  "Ptc": {
+                    "type": "string",
+                    "description": "Passenger type"
+                  },
+                  "Amount": {
+                    "title": "SimpleAmountType",
+                    "type": "object",
+                    "required": [
+                      "Amount",
+                      "CurCode"
+                    ],
+                    "properties": {
+                      "Amount": {
+                        "type": "number",
+                        "description": "Discount or surcharge amount"
+                      },
+                      "CurCode": {
+                        "type": "string",
+                        "description": "Currency code (ISO 4217, 3 letters)"
+                      }
+                    }
+                  }
+                }
+              },
+              "description": "List of promotion amounts per passenger type"
+            },
+            "CardCode": {
+              "type": "string",
+              "description": "Card code (only applicable when PaymentType = A)"
+            },
+            "CardName": {
+              "type": "string",
+              "description": "Card name (only applicable when PaymentType = A)"
+            }
+          },
+          "description": "List of card promotion information"
+        }
+      }
+    },
+    "CriteriaType4": {
+      "$id": "https://example.com/schemas/CriteriaType",
+      "title": "CriteriaType",
+      "type": "object",
+      "description": "Search and filter criteria",
+      "properties": {
+        "Direct": {
+          "type": "boolean",
+          "description": "Whether to search for direct flights only (true = direct flights only)"
+        },
+        "AirlinePreference": {
+          "type": "object",
+          "description": "Preferred airline information",
+          "properties": {
+            "AirlineID": {
+              "type": "array",
+              "description": "List of preferred airline codes",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ProgramCriteria": {
+          "type": "array",
+          "description": "Criteria for applying specific programs",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ContractID": {
+                "type": "string",
+                "description": "Contract ID"
+              },
+              "AccountID": {
+                "type": "array",
+                "description": "List of account IDs",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "AirlineID": {
+                "type": "string",
+                "description": "Airline code"
+              },
+              "TypeCode": {
+                "type": "string",
+                "description": "Type code"
+              }
+            },
+            "required": [
+              "AirlineID"
+            ]
+          }
+        },
+        "PromotionCriteria": {
+          "type": "array",
+          "description": "Criteria for applying promotions",
+          "items": {
+            "type": "object",
+            "properties": {
+              "PromotionID": {
+                "type": "string",
+                "description": "Promotion ID"
+              },
+              "AirlineID": {
+                "type": "string",
+                "description": "Airline code"
+              }
+            },
+            "required": [
+              "AirlineID"
+            ]
+          }
+        },
+        "SpecialFareCriteria": {
+          "type": "array",
+          "description": "Criteria for applying special fares",
+          "items": {
+            "type": "object",
+            "properties": {
+              "AirlineID": {
+                "type": "string",
+                "description": "Airline code"
+              },
+              "AccountID": {
+                "type": "string",
+                "description": "Account ID"
+              }
+            },
+            "required": [
+              "AirlineID"
+            ]
+          }
+        },
+        "ExistingOrderCriteria": {
+          "type": "object",
+          "description": "Criteria for referencing an existing order",
+          "properties": {
+            "OrderID": {
+              "type": "string",
+              "description": "Order ID"
+            },
+            "PaxRefID": {
+              "type": "array",
+              "description": "List of passenger reference IDs",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "OrderID",
+            "PaxRefID"
+          ]
+        }
+      }
+    },
+    "ResponseParameterType5": {
+      "$id": "https://example.com/schemas/ResponseParameterType",
+      "title": "ResponseParameterType",
+      "type": "object",
+      "properties": {
+        "CurrencyCode": {
+          "type": "string",
+          "description": "Currency code (3-letter ISO 4217). Example: KRW, EUR, USD"
+        },
+        "LanguageUsage": {
+          "type": "object",
+          "properties": {
+            "LangCode": {
+              "type": "string",
+              "description": "Language code. Example: en, en-US"
+            },
+            "LangUsageType": {
+              "type": "string",
+              "description": "Type of language usage (e.g., written, spoken)"
+            }
+          },
+          "required": [
+            "LangCode"
+          ]
+        }
+      },
+      "required": [
+        "CurrencyCode"
+      ]
+    }
+  }
+}

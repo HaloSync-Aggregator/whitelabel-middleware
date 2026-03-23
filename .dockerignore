@@ -1,0 +1,13 @@
+.git
+.gitignore
+.idea
+.env
+.env.*
+.DS_Store
+node_modules
+dist
+logs
+coverage
+npm-debug.log
+yarn-debug.log
+yarn-error.log
