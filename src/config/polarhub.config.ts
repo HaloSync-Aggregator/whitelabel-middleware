@@ -1,21 +1,20 @@
 import { registerAs } from '@nestjs/config';
 
 export const polarhubConfig = registerAs('polarhub', () => ({
-  baseUrl: process.env.POLARHUB_API_BASE_URL || 'https://polarhub.sandbox.halo-platform.net',
+  baseUrl: process.env.POLARHUB_API_BASE_URL || 'https://your-tenant.sandbox.halo-platform.net',
   tenantId: process.env.POLARHUB_TENANT_ID || '',
   apiSecret: process.env.POLARHUB_API_SECRET || '',
   timeoutMs: parseInt(process.env.POLARHUB_TIMEOUT_MS || '30000', 10),
   retryCount: parseInt(process.env.POLARHUB_RETRY_COUNT || '3', 10),
 
   // Agency Sender Configuration
-  siteCode: process.env.POLARHUB_SITE_CODE || '01',
+  siteCode: process.env.SALES_BRANCH_ID,
   agencyName: process.env.POLARHUB_AGENCY_NAME,
 
-  // Travel Agency ContactInfo (CTC_TA1)
-  // This ContactInfo is ALWAYS injected into sender.travelAgency.contactInfoRefId
-  agencyContactId: process.env.POLARHUB_AGENCY_CONTACT_ID || 'CTC_TA1',
+  // Travel Agency ContactInfo (Optional - injected when FE doesn't provide)
+  agencyContactId: process.env.POLARHUB_AGENCY_CONTACT_ID,
   agencyContactInfo: {
-    contactInfoId: process.env.POLARHUB_AGENCY_CONTACT_ID || 'CTC_TA1',
+    contactInfoId: process.env.POLARHUB_AGENCY_CONTACT_ID,
     emailAddress: process.env.POLARHUB_AGENCY_EMAIL,
     phone: {
       countryDialingCode: process.env.POLARHUB_AGENCY_PHONE_COUNTRY_CODE,
@@ -51,8 +50,8 @@ export interface PolarHubConfig {
   apiSecret: string;
   timeoutMs: number;
   retryCount: number;
-  siteCode: string;
+  siteCode?: string;
   agencyName?: string;
-  agencyContactId: string;
+  agencyContactId?: string;
   agencyContactInfo: AgencyContactInfo;
 }

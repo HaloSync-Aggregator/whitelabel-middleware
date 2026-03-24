@@ -15,14 +15,14 @@
 import { registerAs } from '@nestjs/config';
 
 export const polarhubConfig = registerAs('polarhub', () => ({
-  baseUrl: process.env.POLARHUB_API_BASE_URL || 'https://polarhub.sandbox.halo-platform.net',
+  baseUrl: process.env.POLARHUB_API_BASE_URL || 'https://your-tenant.sandbox.halo-platform.net',
   tenantId: process.env.POLARHUB_TENANT_ID || '',
   apiSecret: process.env.POLARHUB_API_SECRET || '',
   timeoutMs: parseInt(process.env.POLARHUB_TIMEOUT_MS || '30000', 10),
   retryCount: parseInt(process.env.POLARHUB_RETRY_COUNT || '3', 10),
 
   // Agency Sender Configuration
-  siteCode: process.env.POLARHUB_SITE_CODE || '01',
+  siteCode: process.env.SALES_BRANCH_ID || '01',
   agencyName: process.env.POLARHUB_AGENCY_NAME,
 
   // Travel Agency ContactInfo (CTC_TA1)

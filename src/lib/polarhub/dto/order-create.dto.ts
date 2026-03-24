@@ -602,9 +602,9 @@ export class OrderCreateRQDto {
   @ArrayMinSize(1)
   paxList: PaxDto[];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description:
-      'Contact Information List (Travel Agency + Passengers). Travel Agency contact (CTC_TA1) is required for BA/AF/KL.',
+      'Contact Information List (Travel Agency + Passengers). If omitted and POLARHUB_AGENCY_CONTACT_ID env var is set, agency contact is auto-injected.',
     type: [ContactInfoDto],
     example: [
       {
@@ -632,10 +632,11 @@ export class OrderCreateRQDto {
       },
     ],
   })
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ContactInfoDto)
-  contactInfoList: ContactInfoDto[];
+  contactInfoList?: ContactInfoDto[];
 
   @ApiPropertyOptional({
     description:

@@ -147,8 +147,8 @@ Some airlines require Travel Agency contact info:
           residenceCountryCode: pax.residenceCountryCode,
         })),
 
-        // ContactInfo (pass-through, no modification!)
-        contactInfoList: request.contactInfoList.map((ci) => ({
+        // ContactInfo (pass-through, no modification! Optional - env var fallback if omitted)
+        contactInfoList: request.contactInfoList?.map((ci) => ({
           contactInfoId: ci.contactInfoId,
           emailAddress: ci.emailAddress,
           phone: ci.phone

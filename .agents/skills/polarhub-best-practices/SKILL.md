@@ -213,17 +213,17 @@ const requestBody = {
 const sender = {
   TravelAgency: {
     AgencyID: process.env.POLARHUB_TENANT_ID,       // Required
-    SiteCode: process.env.POLARHUB_SITE_CODE,       // '01'
+    SiteCode: process.env.SALES_BRANCH_ID,       // '01'
     AgencyName: process.env.POLARHUB_AGENCY_NAME,   // 'Whitelabel Agency'
     ContactInfoRefID: [process.env.POLARHUB_AGENCY_CONTACT_ID],  // ['CTC_TA1']
   },
 };
 
 // Environment variable list (.env)
-// POLARHUB_API_BASE_URL=https://polarhub.sandbox.halo-platform.net
+// POLARHUB_API_BASE_URL=https://your-tenant.sandbox.halo-platform.net
 // POLARHUB_TENANT_ID=your-tenant-id
 // POLARHUB_API_SECRET=your-api-secret
-// POLARHUB_SITE_CODE=01
+// SALES_BRANCH_ID=01
 // POLARHUB_AGENCY_NAME=Whitelabel Agency
 // POLARHUB_AGENCY_CONTACT_ID=CTC_TA1
 ```

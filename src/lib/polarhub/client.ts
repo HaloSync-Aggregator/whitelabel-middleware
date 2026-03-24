@@ -39,8 +39,9 @@ import { getRequestLogger, consoleLogger } from './utils/logger';
 
 export class PolarHubClient {
   private readonly config: Required<
-    Omit<PolarHubConfig, 'agencyName' | 'agencyContactId'>
+    Omit<PolarHubConfig, 'agencyName' | 'agencyContactId' | 'siteCode'>
   > & {
+    siteCode?: string;
     agencyName?: string;
     agencyContactId?: string;
   };
@@ -52,7 +53,7 @@ export class PolarHubClient {
       baseUrl: config.baseUrl,
       tenant: config.tenant,
       secretBase64: config.secretBase64,
-      siteCode: config.siteCode || '01',
+      siteCode: config.siteCode,
       agencyName: config.agencyName,
       agencyContactId: config.agencyContactId,
       timeout: config.timeout || 30000,
@@ -73,7 +74,7 @@ export class PolarHubClient {
     return {
       TravelAgency: {
         AgencyID: this.config.tenant,
-        SiteCode: this.config.siteCode,
+        ...(this.config.siteCode && { SiteCode: this.config.siteCode }),
         ...(this.config.agencyName && { AgencyName: this.config.agencyName }),
         ...(this.config.agencyContactId && {
           ContactInfoRefID: [this.config.agencyContactId],

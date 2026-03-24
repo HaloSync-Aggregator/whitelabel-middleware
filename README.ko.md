@@ -107,7 +107,7 @@ Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 �
 - **Pass-through**: 데이터 형식만 변환하고 비즈니스 데이터는 수정하지 않습니다
 - **하드코딩 금지**: 승객/연락처 등 비즈니스 데이터를 코드에 직접 넣지 않습니다
 - **TransactionID**: 프론트엔드에서 생성하여 전달받은 값을 그대로 사용합니다
-- **ContactInfoRefID**: 환경변수에서 항상 자동 주입됩니다
+- **여행사 정보 (Sender / ContactInfo)**: 여행사 사이트 코드, 연락처 등은 FE에서 전달받은 값을 우선 사용하고, 미전달 시 환경변수가 있으면 자동 주입하며, 환경변수도 없으면 해당 필드를 포함하지 않습니다
 
 ## 사전 요구사항
 
@@ -219,12 +219,38 @@ docs/                         # API 스키마, 아키텍처 문서
 | `POLARHUB_TENANT_ID` | 인증 및 테넌트 헤더에 사용되는 테넌트 식별자 |
 | `POLARHUB_API_SECRET` | Base64 인코딩된 HMAC 시크릿 |
 
-### 선택
+### 여행사 정보 (선택)
+
+모든 여행사 관련 환경변수는 **FE 값 우선 → 환경변수 fallback → 미전달** 원칙을 따릅니다.
+
+**Sender 관련**
 
 | 변수 | 기본값 | 설명 |
 |---|---|---|
-| `SALES_BRANCH_ID` | `01` | 사이트 코드 |
-| `POLARHUB_AGENCY_NAME` | 미설정 | 여행사명 |
+| `SALES_BRANCH_ID` | 미설정 | 사이트 코드. FE가 `sender.travelAgency.siteCode`를 보내면 무시됨. FE 미전달 + 미설정 시 생략 |
+| `POLARHUB_AGENCY_NAME` | 미설정 | 여행사명. FE가 `sender.travelAgency.agencyName`을 보내면 무시됨 |
+| `POLARHUB_AGENCY_CONTACT_ID` | 미설정 | 연락처 정보 ID (예: `CTC_TA1`). FE가 `sender.travelAgency.contactInfoRefId`를 보내면 무시됨. OrderCreate 시 여행사 ContactInfo 자동 구성에도 사용 |
+
+**여행사 연락처 상세 (OrderCreate 시 자동 구성용)**
+
+FE가 `contactInfoList`에 여행사 연락처를 포함하면 아래 환경변수는 무시됩니다.
+FE가 생략하고 `POLARHUB_AGENCY_CONTACT_ID`가 설정되어 있으면 아래 정보로 여행사 연락처를 자동 구성합니다.
+둘 다 없으면 여행사 연락처 없이 PolarHub에 전달합니다.
+
+| 변수 | 기본값 | 설명 |
+|---|---|---|
+| `POLARHUB_AGENCY_EMAIL` | 미설정 | 여행사 이메일 주소 |
+| `POLARHUB_AGENCY_PHONE_COUNTRY_CODE` | 미설정 | 전화 국가 코드 |
+| `POLARHUB_AGENCY_PHONE_NUMBER` | 미설정 | 여행사 전화번호 |
+| `POLARHUB_AGENCY_POSTAL_STREET` | 미설정 | 우편 주소 (도로명) |
+| `POLARHUB_AGENCY_POSTAL_CODE` | 미설정 | 우편번호 |
+| `POLARHUB_AGENCY_POSTAL_CITY` | 미설정 | 도시명 |
+| `POLARHUB_AGENCY_POSTAL_COUNTRY` | 미설정 | 국가 코드 (예: `KR`) |
+
+### 서버 및 기타
+
+| 변수 | 기본값 | 설명 |
+|---|---|---|
 | `POLARHUB_TIMEOUT_MS` | `30000` | 요청 타임아웃 (밀리초) |
 | `POLARHUB_RETRY_COUNT` | `3` | 네트워크 재시도 횟수 |
 | `PORT` | `3000` | 로컬 서버 포트 |

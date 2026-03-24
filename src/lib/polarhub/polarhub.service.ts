@@ -179,7 +179,7 @@ export class PolarHubService {
       baseUrl: this.configService.get<string>('POLARHUB_API_BASE_URL') || '',
       tenant: this.configService.get<string>('POLARHUB_TENANT_ID') || '',
       secretBase64: this.configService.get<string>('POLARHUB_API_SECRET') || '',
-      siteCode: this.configService.get<string>('POLARHUB_SITE_CODE') || '01',
+      siteCode: this.configService.get<string>('SALES_BRANCH_ID'),
       agencyName: this.configService.get<string>('POLARHUB_AGENCY_NAME'),
       agencyContactId: this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID'),
       timeout: this.configService.get<number>('POLARHUB_TIMEOUT_MS') || 30000,
@@ -194,41 +194,41 @@ export class PolarHubService {
   /**
    * Sender transformation (camelCase -> PascalCase)
    *
-   * CRITICAL: contactInfoRefId is always force-injected from environment variable (CTC_TA1).
-   * - If sender is not provided by FE: Creates default sender based on environment variables
-   * - If sender is provided by FE: Only contactInfoRefId is force-injected from environment variable
+   * Priority: FE value > env var > skip (not included)
+   * - If sender is not provided by FE: Build from env vars, skip fields that are unset
+   * - If sender is provided by FE: Use FE values, fall back to env vars for missing fields
    */
   private transformSender(sender?: BaseParams['sender']): Sender {
-    const agencyContactId = this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID') || 'CTC_TA1';
+    const agencyContactId = this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID');
     const defaultTenantId = this.configService.get<string>('POLARHUB_TENANT_ID') || '';
-    const defaultSiteCode = this.configService.get<string>('POLARHUB_SITE_CODE') || '01';
+    const defaultSiteCode = this.configService.get<string>('SALES_BRANCH_ID');
     const defaultAgencyName = this.configService.get<string>('POLARHUB_AGENCY_NAME');
 
-    // If FE does not provide sender, create default sender based on env vars
+    // If FE does not provide sender, build from env vars (skip if unset)
     if (!sender) {
       return {
         TravelAgency: {
           AgencyID: defaultTenantId,
-          SiteCode: defaultSiteCode,
+          ...(defaultSiteCode && { SiteCode: defaultSiteCode }),
           ...(defaultAgencyName && { AgencyName: defaultAgencyName }),
-          // CRITICAL: ContactInfoRefID is always force-injected!
-          ContactInfoRefID: [agencyContactId],
+          ...(agencyContactId && { ContactInfoRefID: [agencyContactId] }),
         },
       };
     }
 
-    // If FE provides sender, only force-inject contactInfoRefId from env var
+    // FE provides sender: FE value > env var fallback > skip
     return {
       TravelAgency: {
         AgencyID: sender.travelAgency.agencyId,
-        ...(sender.travelAgency.siteCode && {
-          SiteCode: sender.travelAgency.siteCode,
-        }),
+        ...(sender.travelAgency.siteCode
+          ? { SiteCode: sender.travelAgency.siteCode }
+          : defaultSiteCode ? { SiteCode: defaultSiteCode } : {}),
         ...(sender.travelAgency.agencyName && {
           AgencyName: sender.travelAgency.agencyName,
         }),
-        // CRITICAL: ContactInfoRefID ignores FE value, force-injected from env var!
-        ContactInfoRefID: [agencyContactId],
+        ...(sender.travelAgency.contactInfoRefId?.length
+          ? { ContactInfoRefID: sender.travelAgency.contactInfoRefId }
+          : agencyContactId ? { ContactInfoRefID: [agencyContactId] } : {}),
       },
     };
   }
@@ -856,27 +856,29 @@ export class PolarHubService {
       PaxList: this.buildOrderPaxList(params.paxList),
     };
 
-    // Build ContactInfoList
-    // 1. ContactInfo received from FE (passenger contacts, etc.)
-    const feContactInfoList = params.contactInfoList && params.contactInfoList.length > 0
+    // Build ContactInfoList (Priority: FE > env var > skip)
+    // 1. FE contactInfoList (pass-through)
+    const contactInfoList: Record<string, unknown>[] = params.contactInfoList?.length
       ? this.buildContactInfoList(params.contactInfoList)
       : [];
 
-    // 2. Travel Agency ContactInfo (auto-injected from env vars) - CRITICAL!
-    const agencyContactInfo = this.buildAgencyContactInfo();
-    const agencyContactId = this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID') || 'CTC_TA1';
+    // 2. If FE didn't include agency contact and env var is set, inject as fallback
+    const agencyContactId = this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID');
+    if (agencyContactId) {
+      const hasAgencyContact = contactInfoList.some(
+        (ci: Record<string, unknown>) => ci.ContactInfoID === agencyContactId,
+      );
+      if (!hasAgencyContact) {
+        const agencyContactInfo = this.buildAgencyContactInfo();
+        if (agencyContactInfo) {
+          contactInfoList.unshift(agencyContactInfo);
+        }
+      }
+    }
 
-    // 3. Deduplication: Do not overwrite if FE already sent CTC_TA1
-    const hasAgencyContact = feContactInfoList.some(
-      (ci: Record<string, unknown>) => ci.ContactInfoID === agencyContactId,
-    );
-
-    // 4. Combine ContactInfoList
-    if (agencyContactInfo && !hasAgencyContact) {
-      // Add Travel Agency ContactInfo at the beginning
-      query.ContactInfoList = [agencyContactInfo, ...feContactInfoList];
-    } else if (feContactInfoList.length > 0) {
-      query.ContactInfoList = feContactInfoList;
+    // 3. Include only if non-empty
+    if (contactInfoList.length > 0) {
+      query.ContactInfoList = contactInfoList;
     }
 
     // Add PaymentList (for immediate ticketing)

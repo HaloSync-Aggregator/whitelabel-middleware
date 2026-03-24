@@ -61,36 +61,37 @@ const headers = getOrGenerateAuthHeaders(
 #### Sender (FE value takes priority, environment variable fallback)
 ```typescript
 // Sender: Can be sent from FE (Optional)
-// If FE provides sender, use that value; otherwise use environment variables
-// ⚠️ However, contactInfoRefId is always force-injected from environment variable!
+// Priority: FE value > env var > skip (not included)
 
-// ✅ CORRECT - Sender sent from FE
+// ✅ CORRECT - Sender sent from FE (all fields used as-is)
 {
   "sender": {
     "travelAgency": {
       "agencyId": "AGENCY_001",
       "siteCode": "01",
-      "agencyName": "My Travel Agency"
-      // contactInfoRefId is ignored even if sent from FE → environment variable value is used
+      "agencyName": "My Travel Agency",
+      "contactInfoRefId": ["CTC_TA1"]
     }
   },
   "transactionId": "...",
   "orders": [...]
 }
 
-// ✅ CORRECT - When Sender is omitted, default sender is auto-generated from environment variables
+// ✅ CORRECT - When Sender is omitted, built from env vars (missing env vars are skipped)
 {
   "transactionId": "...",
   "orders": [...]
 }
-// → Sender is auto-generated using POLARHUB_TENANT_ID, POLARHUB_SITE_CODE, POLARHUB_AGENCY_CONTACT_ID, etc.
+// → Sender is built using POLARHUB_TENANT_ID, SALES_BRANCH_ID, POLARHUB_AGENCY_CONTACT_ID (all optional)
 ```
 
 #### Sender Priority
 | Field | Priority | Behavior |
 |-------|----------|----------|
-| agencyId, siteCode, agencyName | FE > Environment variable | FE value takes priority; falls back to environment variable |
-| **contactInfoRefId** | **Environment variable only** | **FE value ignored, always force-injected from environment variable!** |
+| agencyId | FE > POLARHUB_TENANT_ID | FE value takes priority; falls back to env var |
+| siteCode | FE > SALES_BRANCH_ID > skip | FE value > env var > not included |
+| agencyName | FE > POLARHUB_AGENCY_NAME > skip | FE value > env var > not included |
+| contactInfoRefId | FE > POLARHUB_AGENCY_CONTACT_ID > skip | FE value > env var > not included |
 
 #### PointOfSale
 ```typescript
@@ -161,37 +162,42 @@ Label: 'Mobile',  // Hardcoded!
 CitizenshipCountryCode: 'KR',  // Hardcoded!
 ```
 
-### 1-3. Travel Agency ContactInfo Auto-Injection (CRITICAL - Added 2026-01-21)
+### 1-3. Travel Agency ContactInfo Optional Injection (Updated 2026-03-24)
 
-> **MUST**: `sender.travelAgency.contactInfoRefId` is **always force-injected** from environment variables.
+> **Priority**: FE value > env var (`POLARHUB_AGENCY_CONTACT_ID`) > skip (not included)
 
-#### Auto-Injection Behavior
-- FE does not provide sender → Default sender is auto-generated from environment variables
-- FE provides sender → Only contactInfoRefId is force-replaced with the environment variable value
+#### Injection Behavior
+- FE provides contactInfoRefId in sender → Use FE value as-is
+- FE does not provide, env var is set → Inject env var value
+- Neither provided → Skip (not included in request)
+
+#### ContactInfoList in OrderCreate
+- FE provides contactInfoList → Use FE list as-is
+- FE omits contactInfoList, env vars (POLARHUB_AGENCY_CONTACT_ID + AGENCY_EMAIL, etc.) set → Auto-build agency contact
+- Neither provided → Skip (ContactInfoList not included)
 
 ```typescript
 // polarhub.service.ts - transformSender method
 private transformSender(sender?: BaseParams['sender']): Sender {
-  const agencyContactId = this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID') || 'CTC_TA1';
+  const agencyContactId = this.configService.get<string>('POLARHUB_AGENCY_CONTACT_ID');
 
-  // If sender is not provided by FE, generate default sender from environment variables
   if (!sender) {
     return {
       TravelAgency: {
         AgencyID: defaultTenantId,
-        SiteCode: defaultSiteCode,
-        // CRITICAL: ContactInfoRefID is always force-injected!
-        ContactInfoRefID: [agencyContactId],
+        ...(defaultSiteCode && { SiteCode: defaultSiteCode }),
+        ...(agencyContactId && { ContactInfoRefID: [agencyContactId] }),
       },
     };
   }
 
-  // Even if FE provides sender, force-inject only contactInfoRefId from environment variable
+  // FE value > env var > skip
   return {
     TravelAgency: {
       AgencyID: sender.travelAgency.agencyId,
-      // CRITICAL: ContactInfoRefID ignores FE value, force-injected from environment variable!
-      ContactInfoRefID: [agencyContactId],
+      ...(sender.travelAgency.contactInfoRefId?.length
+        ? { ContactInfoRefID: sender.travelAgency.contactInfoRefId }
+        : agencyContactId ? { ContactInfoRefID: [agencyContactId] } : {}),
     },
   };
 }
@@ -511,14 +517,14 @@ this.transformFopPromotion(params.fopPromotion)  // FopPromotionType
 ### 2. Environment Variables (.env)
 ```env
 # API Connection
-POLARHUB_API_BASE_URL=https://polarhub.sandbox.halo-platform.net
+POLARHUB_API_BASE_URL=https://your-tenant.sandbox.halo-platform.net
 POLARHUB_TENANT_ID=your-tenant-id
 POLARHUB_API_SECRET=your-api-secret
 POLARHUB_TIMEOUT_MS=30000
 POLARHUB_RETRY_COUNT=3
 
 # Agency Sender Configuration
-POLARHUB_SITE_CODE=01
+SALES_BRANCH_ID=01
 POLARHUB_AGENCY_NAME=Whitelabel Agency
 
 # Travel Agency ContactInfo (CTC_TA1) - CRITICAL: Always force-injected!

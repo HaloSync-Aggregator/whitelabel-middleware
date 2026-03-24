@@ -1066,14 +1066,14 @@ private transformPaymentList(paymentList?: PaymentDto[]) {
 
 ```env
 # API Connection
-POLARHUB_API_BASE_URL=https://polarhub-{tenant}.sandbox.halo-platform.net
+POLARHUB_API_BASE_URL=https://your-tenant.sandbox.halo-platform.net
 POLARHUB_TENANT_ID=YOUR_TENANT_ID
 POLARHUB_API_SECRET=your_base64_encoded_secret
 POLARHUB_TIMEOUT_MS=30000
 POLARHUB_RETRY_COUNT=3
 
 # Agency Sender Configuration
-POLARHUB_SITE_CODE=01
+SALES_BRANCH_ID=01
 POLARHUB_AGENCY_NAME=Whitelabel Agency
 
 # Travel Agency ContactInfo (CTC_TA1) - CRITICAL: Always force-injected!
