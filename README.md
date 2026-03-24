@@ -109,12 +109,26 @@ Reference assets under `.claude/`:
 - **TransactionID**: Pass through the value generated and provided by the frontend as-is
 - **Agency info (Sender / ContactInfo)**: Agency site code, contact details, etc. use the FE-provided value first. If not provided by FE, fall back to environment variables. If neither is set, the field is omitted from the request
 
+## Onboarding & Credentials
+
+To use this middleware, you need PolarHub Sandbox credentials (`POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`). These are issued after onboarding.
+
+**How to onboard:**
+
+Send an onboarding request to **contact@halosync.kr** with your company name and use case. The team will issue your Sandbox credentials.
+
+> Automated self-service onboarding portal is currently in progress.
+
+| Credential | Description | How to get |
+|---|---|---|
+| `POLARHUB_TENANT_ID` | Agency / Tenant identifier | Issued after onboarding |
+| `POLARHUB_API_SECRET` | API secret (Base64-encoded) | Issued after onboarding |
+| `POLARHUB_API_BASE_URL` | Sandbox API URL | Provided with credentials |
+
 ## Prerequisites
 
 - **Node.js** 20 or higher
-- **PolarHub access credentials** (for API calls):
-  - `POLARHUB_API_BASE_URL`, `POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`
-  - Contact your PolarHub administrator or platform operator
+- **PolarHub Sandbox credentials** (see [Onboarding](#onboarding--credentials) above)
 - **AI tool** (for code generation): [Claude Code](https://claude.ai/code) Max plan or above
 
 ## Quick Start

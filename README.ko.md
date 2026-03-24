@@ -109,12 +109,26 @@ Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 �
 - **TransactionID**: 프론트엔드에서 생성하여 전달받은 값을 그대로 사용합니다
 - **여행사 정보 (Sender / ContactInfo)**: 여행사 사이트 코드, 연락처 등은 FE에서 전달받은 값을 우선 사용하고, 미전달 시 환경변수가 있으면 자동 주입하며, 환경변수도 없으면 해당 필드를 포함하지 않습니다
 
+## 온보딩 및 인증 정보
+
+이 미들웨어를 사용하려면 PolarHub Sandbox 인증 정보 (`POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`)가 필요합니다. 온보딩 완료 후 발급됩니다.
+
+**온보딩 방법:**
+
+**contact@halosync.kr** 로 회사명과 사용 목적을 포함하여 온보딩 요청 메일을 보내주세요. 담당 팀에서 Sandbox 인증 정보를 발급해드립니다.
+
+> 자동화된 셀프 서비스 온보딩 포탈은 현재 준비 중입니다.
+
+| 인증 정보 | 설명 | 발급 방법 |
+|---|---|---|
+| `POLARHUB_TENANT_ID` | Agency / Tenant 식별자 | 온보딩 후 발급 |
+| `POLARHUB_API_SECRET` | API 시크릿 (Base64 인코딩) | 온보딩 후 발급 |
+| `POLARHUB_API_BASE_URL` | Sandbox API URL | 인증 정보와 함께 제공 |
+
 ## 사전 요구사항
 
 - **Node.js** 20 이상
-- **PolarHub 접속 정보** (API 호출용):
-  - `POLARHUB_API_BASE_URL`, `POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`
-  - PolarHub 관리자 또는 플랫폼 운영자에게 문의
+- **PolarHub Sandbox 인증 정보** (위 [온보딩](#온보딩-및-인증-정보) 참조)
 - **AI 도구** (코드 생성 시): [Claude Code](https://claude.ai/code) Max 플랜 이상
 
 ## 빠른 시작
