@@ -119,7 +119,7 @@ To use this middleware, you need PolarHub Sandbox credentials (`POLARHUB_TENANT_
 
 **How to onboard:**
 
-Send an onboarding request to **contact@halosync.kr** with your company name and use case. The team will issue your Sandbox credentials.
+Send an onboarding request to **contact@halocorp.kr** with your company name and use case. The team will issue your Sandbox credentials.
 
 > Automated self-service onboarding portal is currently in progress.
 
