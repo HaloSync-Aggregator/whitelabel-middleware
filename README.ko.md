@@ -120,7 +120,7 @@ Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 �
 **셀프 온보딩:**
 
 1. 샌드박스 가입 포털 접속: **https://albus.sandbox.halo-platform.net/sign-up**
-2. 회사 이메일, 테넌트명(`POLARHUB_TENANT_ID`로 사용), 선택사항인 IATA 번호(Production에서만 필수)를 입력합니다.
+2. 회사 이메일, 테넌트명(`POLARHUB_TENANT_ID`로 사용), 선택사항인 IATA 번호를 입력합니다.
 3. 약 10분 이내에 샌드박스 자격증명(`POLARHUB_TENANT_ID` + Base64 `POLARHUB_API_SECRET`)이 발급됩니다.
 
 | 인증 정보 | 설명 | 발급 방법 |

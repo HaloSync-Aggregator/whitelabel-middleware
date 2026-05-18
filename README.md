@@ -120,7 +120,7 @@ To use this middleware, you need PolarHub Sandbox credentials (`POLARHUB_TENANT_
 **How to onboard (self-serve):**
 
 1. Open the sandbox sign-up portal: **https://albus.sandbox.halo-platform.net/sign-up**
-2. Submit your company email, a tenant name (becomes `POLARHUB_TENANT_ID`), and an optional IATA number (required for Production only).
+2. Submit your company email, a tenant name (becomes `POLARHUB_TENANT_ID`), and an optional IATA number.
 3. Sandbox credentials (`POLARHUB_TENANT_ID` + Base64 `POLARHUB_API_SECRET`) are issued within ~10 minutes.
 
 | Credential | Description | How to get |
