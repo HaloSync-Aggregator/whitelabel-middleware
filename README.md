@@ -115,19 +115,29 @@ Reference assets under `.claude/`:
 
 ## Onboarding & Credentials
 
-To use this middleware, you need PolarHub Sandbox credentials (`POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`). These are issued after onboarding.
+To use this middleware, you need PolarHub Sandbox credentials (`POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`). These are issued through a self-serve sandbox sign-up portal — no signed contract, no sales call.
 
-**How to onboard:**
+**How to onboard (self-serve):**
 
-Send an onboarding request to **contact@halocorp.kr** with your company name and use case. The team will issue your Sandbox credentials.
-
-> Automated self-service onboarding portal is currently in progress.
+1. Open the sandbox sign-up portal: **https://albus.sandbox.halo-platform.net/sign-up**
+2. Submit your company email, a tenant name (becomes `POLARHUB_TENANT_ID`), and an optional IATA number.
+3. Sandbox credentials (`POLARHUB_TENANT_ID` + Base64 `POLARHUB_API_SECRET`) are issued within ~10 minutes.
 
 | Credential | Description | How to get |
 |---|---|---|
-| `POLARHUB_TENANT_ID` | Agency / Tenant identifier | Issued after onboarding |
-| `POLARHUB_API_SECRET` | API secret (Base64-encoded) | Issued after onboarding |
+| `POLARHUB_TENANT_ID` | Agency / Tenant identifier | Issued by the sandbox sign-up portal |
+| `POLARHUB_API_SECRET` | API secret (Base64-encoded) | Issued by the sandbox sign-up portal |
 | `POLARHUB_API_BASE_URL` | Sandbox API URL | Provided with credentials |
+
+### 30-minute fast start
+
+1. **Sign up** — fill the portal form (~5 min); credentials are issued within ~10 min.
+2. **Run the server** (~5 min) — follow [Quick Start](#quick-start) to `npm install && npm run start:dev`, then open Swagger at `http://localhost:3000/middleware`.
+3. **First API call** (~20 min) — execute an `air-shopping` request against airline sandbox test data.
+
+> Sandbox is backed by airline-provided NDC test data. Bookings created here are **not ticketed and do not affect IATA settlement**.
+
+Learn more: [From Whitepaper to Working Code](https://halosync.kr/resources/from-whitepaper-to-working-code/)
 
 ## Prerequisites
 

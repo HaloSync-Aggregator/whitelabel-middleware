@@ -115,19 +115,29 @@ Claude Code에서 이 스킬을 실행하면 7단계에 걸쳐 34개 파일을 �
 
 ## 온보딩 및 인증 정보
 
-이 미들웨어를 사용하려면 PolarHub Sandbox 인증 정보 (`POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`)가 필요합니다. 온보딩 완료 후 발급됩니다.
+이 미들웨어를 사용하려면 PolarHub Sandbox 인증 정보 (`POLARHUB_TENANT_ID`, `POLARHUB_API_SECRET`)가 필요합니다. 셀프 서비스 샌드박스 가입 포털을 통해 발급받습니다 — 별도 계약, 영업 미팅 없이 바로 시작합니다.
 
-**온보딩 방법:**
+**셀프 온보딩:**
 
-**contact@halocorp.kr** 로 회사명과 사용 목적을 포함하여 온보딩 요청 메일을 보내주세요. 담당 팀에서 Sandbox 인증 정보를 발급해드립니다.
-
-> 자동화된 셀프 서비스 온보딩 포탈은 현재 준비 중입니다.
+1. 샌드박스 가입 포털 접속: **https://albus.sandbox.halo-platform.net/sign-up**
+2. 회사 이메일, 테넌트명(`POLARHUB_TENANT_ID`로 사용), 선택사항인 IATA 번호를 입력합니다.
+3. 약 10분 이내에 샌드박스 자격증명(`POLARHUB_TENANT_ID` + Base64 `POLARHUB_API_SECRET`)이 발급됩니다.
 
 | 인증 정보 | 설명 | 발급 방법 |
 |---|---|---|
-| `POLARHUB_TENANT_ID` | Agency / Tenant 식별자 | 온보딩 후 발급 |
-| `POLARHUB_API_SECRET` | API 시크릿 (Base64 인코딩) | 온보딩 후 발급 |
+| `POLARHUB_TENANT_ID` | Agency / Tenant 식별자 | 샌드박스 가입 포털에서 발급 |
+| `POLARHUB_API_SECRET` | API 시크릿 (Base64 인코딩) | 샌드박스 가입 포털에서 발급 |
 | `POLARHUB_API_BASE_URL` | Sandbox API URL | 인증 정보와 함께 제공 |
+
+### 30분 빠른 시작
+
+1. **가입** — 포털 폼 작성(~5분); 자격증명은 약 10분 이내에 발급됩니다.
+2. **서버 실행 (~5분)** — [빠른 시작](#빠른-시작) 절차에 따라 `npm install && npm run start:dev` 후 `http://localhost:3000/middleware`에서 Swagger를 엽니다.
+3. **첫 API 호출 (~20분)** — 항공사 샌드박스 테스트 데이터로 `air-shopping` 요청을 실행합니다.
+
+> 샌드박스는 항공사가 제공하는 NDC 테스트 데이터를 사용합니다. 여기서 생성된 예약은 **발권되지 않으며 IATA 정산에 영향을 주지 않습니다**.
+
+자세히 보기: [From Whitepaper to Working Code](https://halosync.kr/resources/from-whitepaper-to-working-code/)
 
 ## 사전 요구사항
 
